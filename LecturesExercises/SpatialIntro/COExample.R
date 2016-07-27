@@ -11,22 +11,49 @@ library( fields)
   y<- y[good]
   elev<- elev[good]
  
-    NGRID <- 50 
- # get elevations on a grid (will use these later) 
-   COGrid<- fields.x.to.grid( x, nx=NGRID, ny=NGRID)
-   COGridPoints<- make.surface.grid( COGrid)
-   data( RMelevation)
-   COElevGrid<- interp.surface( RMelevation, COGridPoints )
-  
 # take a look at the data
   quilt.plot( x, y) 
   US( add=TRUE)
+  
+# simple exploratory fitting
+# thinplate spline fit  
+  obj<- Tps( x,y)
+  summary( obj)
+  plot( obj)
+# quick plot of surface  
+  out<- predictSurface( obj)
+  image.plot( out)
+  contour( add=TRUE)
+  US( add=TRUE)
+# a rougher surface  found by altering the degrees of freedom.
+ 
+  obj2<- Tps( x,y, df=100)
+  out2<- predictSurface( obj2, df= 100)
+
+# adjusting for elevation
+  
+  obj3<- Tps( x,y, Z=elev)
+# smooth surface without the elev contribution
+  surface(obj3)  
+  
   
   plot( elev, y)
   plot( x[,2], y)
   
   X<- cbind( x, elev) 
+  
 # 
+  
+#
+  
+  NGRID <- 50 
+  # get elevations on a grid (will use these later) 
+  COGrid<- fields.x.to.grid( x, nx=NGRID, ny=NGRID)
+  COGridPoints<- make.surface.grid( COGrid)
+  data( RMelevation)
+  COElevGrid<- interp.surface( RMelevation, COGridPoints )
+  
+  
  lmObj<- lm( y ~ lon+lat +elev, data=X )  
  summary( lmObj)
   quilt.plot( x, lmObj$residuals) 
